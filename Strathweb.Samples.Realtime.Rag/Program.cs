@@ -60,7 +60,7 @@ var sessionOptions = new ConversationSessionOptions()
     },
     InputAudioFormat = ConversationAudioFormat.Pcm16,
     OutputAudioFormat = ConversationAudioFormat.Pcm16,
-    Temperature = 0
+    Temperature = 0.6f
 };
 
 await session.ConfigureSessionAsync(sessionOptions);
@@ -134,7 +134,7 @@ async Task Process(RealtimeConversationSession session)
 
                 break;
             case ConversationErrorUpdate conversationErrorUpdate:
-                Console.Error.WriteLine($"Error! {conversationErrorUpdate}");
+                Console.Error.WriteLine($"Error! {conversationErrorUpdate.ErrorMessage}");
                 return;
         }
     }
