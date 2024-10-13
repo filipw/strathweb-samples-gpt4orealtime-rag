@@ -396,3 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+Strathweb.Samples.Realtime.Rag/.idea/.idea.Strathweb.Samples.Realtime.dir/.idea
+assistant-response.pcm
+.env
