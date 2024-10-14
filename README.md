@@ -29,7 +29,7 @@ cd Strathweb.Samples.Realtime.Rag
 dotnet run
 ```
 
-For portability (.NET audio APIs and mic control are not cross-platform), the demo uses raw PCM audio files for input and output. The audio input comes from the attached sample audio file `user-question.pcm` (which is the user asking "do you have any flamingo products?"). The output is streamed back from the GPT-4o Realtime model as audio and saved into `assistant-response.pcm`. The response will be based on the data "flamingo" indexed in the Azure AI Search index.
+For portability (.NET audio APIs and mic control are not cross-platform), the demo uses raw PCM audio files for input and output. The audio input comes from the attached sample audio file [user-question.pcm]((./Strathweb.Samples.Realtime.Rag/user-question.pcm)) (which is the user asking "do you have any flamingo products?"). The output is streamed back from the GPT-4o Realtime model as audio and saved into [assistant-response.pcm]((./Strathweb.Samples.Realtime.Rag/assistant-response.pcm)). The response will be based on the data "flamingo" indexed in the Azure AI Search index. The repo also contains an [example-assistant-response.pcm](./Strathweb.Samples.Realtime.Rag/example-assistant-response.pcm) file that contains a sample response that you might expect.
 
 The files can be played back using any audio player that supports raw PCM audio. It can also be played back from the command line using [ffplay](https://www.ffmpeg.org/ffplay.html):
 
