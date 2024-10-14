@@ -9,6 +9,7 @@ using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Models;
 
+// bootstrap RealtimeConvetrsationClient 
 var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ??
                throw new Exception("'AZURE_OPENAI_ENDPOINT' must be set");
 var key = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ??
@@ -18,6 +19,7 @@ var deploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT
 var aoaiClient = new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(key));
 var client = aoaiClient.GetRealtimeConversationClient(deploymentName);
 
+// bootstrap SearchClient
 var searchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT") ??
                      throw new Exception("'AZURE_SEARCH_ENDPOINT' must be set");
 
@@ -27,53 +29,57 @@ var indexName = Environment.GetEnvironmentVariable("AZURE_SEARCH_INDEX");
 var indexClient = new SearchIndexClient(new Uri(searchEndpoint), new AzureKeyCredential(searchCredential));
 var searchClient = indexClient.GetSearchClient(indexName);
 
-using var session = await client.StartConversationSessionAsync();
+// prepare audio input, this plays the role of mic input in this demo
+var inputAudioPath = Path.Combine(Directory.GetCurrentDirectory(), "user-question.pcm");
+await using var inputAudioStream = File.OpenRead(inputAudioPath);
 
+// bootstrap voice conversation session
+using var session = await client.StartConversationSessionAsync();
 var sessionOptions = new ConversationSessionOptions()
 {
-    Instructions = """
-                   You are a helpful voice-enabled customer assistant for a sports store.
-                   As the voice assistant, you answer questions very succinctly and friendly. Do not enumerate any items and be brief.
-                   Only answer questions based on information available in the product search, accessible via the 'search' tool.
-                   Always use the 'search' tool before answering a question about products.
-                   If the 'search' tool does not yield any product results, respond that you are unable to answer the given question.
-                   """,
+    Instructions = 
+        """
+        You are a helpful voice-enabled customer assistant for a sports store.
+        As the voice assistant, you answer questions very succinctly and friendly. Do not enumerate any items and be brief.
+        Only answer questions based on information available in the product search, accessible via the 'search' tool.
+        Always use the 'search' tool before answering a question about products.
+        If the 'search' tool does not yield any product results, respond that you are unable to answer the given question.
+        """,
     Tools =
     {
         new ConversationFunctionTool
         {
             Name = "search",
             Description = "Search the product catalog for product information",
-            Parameters = BinaryData.FromString("""
-                                               {
-                                                 "type": "object",
-                                                 "properties": {
-                                                   "query": {
-                                                     "type": "string",
-                                                     "description": "The search query e.g. 'miami themed products'"
-                                                   }
-                                                 },
-                                                 "required": ["query"]
-                                               }
-                                               """)
+            Parameters = BinaryData.FromString(
+                """
+                {
+                  "type": "object",
+                  "properties": {
+                    "query": {
+                      "type": "string",
+                      "description": "The search query e.g. 'miami themed products'"
+                    }
+                  },
+                  "required": ["query"]
+                }
+                """)
         }
     },
     InputAudioFormat = ConversationAudioFormat.Pcm16,
     OutputAudioFormat = ConversationAudioFormat.Pcm16,
     Temperature = 0.6f
 };
-
 await session.ConfigureSessionAsync(sessionOptions);
 
-var inputAudioPath = Path.Combine(Directory.GetCurrentDirectory(), "user-question.pcm");
-await using var inputAudioStream = File.OpenRead(inputAudioPath);
+// dispatch audio and start processing responses
 await session.SendAudioAsync(inputAudioStream);
-
-var functionCalls = new Dictionary<string, StringBuilder>();
 await Process(session);
 
 async Task Process(RealtimeConversationSession session)
 {
+    var functionCalls = new Dictionary<string, StringBuilder>();
+
     await using var outputAudioStream = File.Create("assistant-response.pcm");
     await foreach (var update in session.ReceiveUpdatesAsync())
     {

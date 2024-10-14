@@ -400,3 +400,4 @@ Strathweb.Samples.Realtime.Rag/.idea/.idea.Strathweb.Samples.Realtime.dir/.idea
 assistant-response.pcm
 .env
 .idea
+.DS_Store
