@@ -13,7 +13,7 @@ using Azure.Search.Documents.Models;
 var endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ??
                throw new Exception("'AZURE_OPENAI_ENDPOINT' must be set");
 var key = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ??
-          throw new Exception("'AZURE_OPENAI_ENDPOINT' must be set");
+          throw new Exception("'AZURE_OPENAI_API_KEY' must be set");
 var deploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT") ?? "gpt-4o-realtime-preview";
 
 var aoaiClient = new AzureOpenAIClient(new Uri(endpoint), new ApiKeyCredential(key));
@@ -40,9 +40,10 @@ var sessionOptions = new ConversationSessionOptions()
     Instructions = 
         """
         You are a helpful voice-enabled customer assistant for a sports store.
-        As the voice assistant, you answer questions very succinctly and friendly. Do not enumerate any items and be brief.
+        As the voice assistant, you answer questions very succinctly and friendly. 
         Only answer questions based on information available in the product search, accessible via the 'search' tool.
         Always use the 'search' tool before answering a question about products.
+        When responding, produce a brief response. Do not use bullet points but refer to the products in a continuous fashion.
         If the 'search' tool does not yield any product results, respond that you are unable to answer the given question.
         """,
     Tools =
