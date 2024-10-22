@@ -2,6 +2,8 @@
 
 The demo works with Azure OpenAI and Azure AI Search.
 
+📝 [Blog post with more details](https://www.strathweb.com/2024/10/speech-based-retrieval-augmented-generation-with-gpt-realtime-api/)
+
 ## Prerequisites
 
 ### Variables
